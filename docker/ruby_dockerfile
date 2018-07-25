@@ -1,0 +1,21 @@
+FROM ruby:2.5-alpine
+
+RUN apk add --update \
+  build-base \
+  mariadb-dev \
+  sqlite-dev \
+  nodejs \
+  tzdata \
+  && rm -rf /var/cache/apk/*
+
+RUN gem install rails && \
+    mkdir -p /www && \
+    cd \www && \
+    rails new hello && \
+    rails generate controller pages 
+
+RUN ls -alh /www/hello    
+ADD hello /www/hello
+
+WORKDIR /www/hello
+

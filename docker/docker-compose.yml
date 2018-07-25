@@ -1,0 +1,44 @@
+version: "2"
+
+services:
+
+  db:
+    image: mariadb:10.3-jessie
+    networks:
+      - werx
+    ports:
+      - "3306:3306"
+    volumes:
+      - ${PWD}/data/dockersql:/var/lib/mysql
+    env_file:
+      - mysql.dev.env
+
+  nginx:
+    image: nginx:1.15-alpine
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - ruby
+    networks:
+      - werx
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    command: /bin/sh -c "nginx -g 'daemon off;'"
+
+  ruby:
+    build:
+      dockerfile: ruby_dockerfile
+      context: ./
+    networks:
+      - werx
+    env_file:
+      - mysql.dev.env
+    command: /bin/sh -c "rails server"
+
+
+networks:
+  werx:
+    driver: bridge
